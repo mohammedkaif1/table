@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem, Avatar, Button } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem, Avatar, Button, FormControl, RadioGroup, FormControlLabel,Radio, Popover, TextField } from '@mui/material';
 import FlagIcon from '@mui/icons-material/Flag';
 import KPI from './Kpi';
 import AddEmployeeModal from './AddEmployeeModal';
 import "./style.css"
 import {TablePagination} from '@mui/material'
 import Kpi from './main';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 
 
 
@@ -16,6 +18,59 @@ const TableComponent = ({ onOptionChange }) => {
   const [kpi2, setKpi2] = useState(0);
   const [tableData, setTableData] = useState([]);
   const [openModal, setOpenModal] = useState(false);
+  const[rotationType,setRotationType]=useState('')
+  const [durationsort,setDurationSort]=useState('')
+  const[popoverTexts,setPopoverTexts]=useState({})
+  const[popoverOpen,setPopoverOpen]=useState({
+    employeeId:false,
+    employeeName:false,
+    sdm:false,
+    skills:false,
+    durationInProject:false,
+    project:false,
+    
+    
+
+
+  });
+  const[PopoverAnchorE1,setPopoverAnchorE1]=useState({
+    employeeId:false,
+    employeeName:false,
+    sdm:false,
+    skills:false,
+    durationInProject:false,
+    project:false,
+    eligibleForRotationPool:false,
+    flaggedForRotation:false,
+    
+
+
+  });
+
+  const[isapplied,setIsapplied]=useState({
+    employeeId:false,
+    employeeName:false,
+    sdm:false,
+    skills:false,
+    durationInProject:false,
+    project:false,
+    eligibleForRotationPool:false,
+    flaggedForRotation:false,
+    
+
+
+  });
+  
+  
+  
+
+
+
+
+  
+  
+  
+
 
 
   useEffect(() => {
@@ -115,10 +170,136 @@ const handleRowperpageChange=(event)=>{
   changerowperpage(+event.target.value);
   changepage(0)
 }
+const handleRotationTypechange=(event)=>{
+  
+  
+  setRotationType(event.target.value)
+  
+
+
+
+}
+const handleDurationSortChange=(event)=>{
+  setDurationSort(event.target.value)
+}
+const handlePopoverOpen=(columnName,event)=>{
+  setPopoverOpen(prevPopoverOpen=>({
+    ...prevPopoverOpen,
+    [columnName]:true
+  }));
+  setPopoverAnchorE1(prevAnchorE1=>(
+    {
+      ...prevAnchorE1,
+      [columnName]:event.currentTarget
+    }
+  ));
+
+};
+const handlePopoverClose=(columnName)=>{
+  setPopoverOpen(prevPopoverOpen=>({
+    ...prevPopoverOpen,
+    [columnName]:false
+  }));
+  setPopoverAnchorE1(prevAnchorE1=>(
+    {
+      ...prevAnchorE1,
+      [columnName]:null
+    }
+  ));
+}
+const handlePopoverSubmit=(columnName)=>{
+  setPopoverTexts(prevTexts=>({
+    ...prevTexts,
+    [columnName]:prevTexts[columnName]
+
+  }));
+  handlePopoverClose(columnName)
+  //setPopoverFilter(popoverText)
+  setIsapplied(prevIsapplied=>({
+    ...prevIsapplied,
+    [columnName]:true
+  }));
+  console.log(popoverTexts)
+  
+};
+const remove=(columnName)=>{
+  //setPopoverFilter('')
+  setPopoverTexts(prevTexts=>({
+    ...prevTexts,
+    [columnName]:''
+
+  }));
+
+  
+  setIsapplied(prevIsapplied=>({
+    ...prevIsapplied,
+    [columnName]:false
+  }))
+}
+const handlePopoverOpen1=(columnName,event)=>{
+  setPopoverOpen(prevPopoverOpen=>({
+    ...prevPopoverOpen,
+    [columnName]:true
+  }));
+  setPopoverAnchorE1(prevAnchorE1=>(
+    {
+      ...prevAnchorE1,
+      [columnName]:event.currentTarget
+    }
+  ));
+  console.log(popoverTexts)
+
+};
+const handlePopoverSubmit1=(columnName,e)=>{
+  setPopoverTexts(prevTexts=>({
+    ...prevTexts,
+    [columnName]:prevTexts[columnName]
+
+  }));
+  setPopoverTexts(prevTexts=>({
+    ...prevTexts,
+    sdm:e.target.value
+  }))
+  console.log(popoverTexts)
+ 
+  handlePopoverClose(columnName)
+  //setPopoverFilter(popoverText)
+  setIsapplied(prevIsapplied=>({
+    ...prevIsapplied,
+    [columnName]:true
+  }));
+  
+};
+
+
+{/*const filteredData=tableData.filter(item =>{
+  if(rotationType==='eligible')
+    {
+      return item.eligibleForRotationPool==='Yes';
+    }
+    else if(rotationType==='flagged')
+      {
+        return item.flaggedForRotation==='Yes';
+      }
+      else{
+        return true;
+      }
+})
+const sortedData=filteredData.sort((a,b)=>{
+  const durationA=parseInt(a.durationInProject)
+  const durationB=parseInt(b.durationInProject)
+  if(durationsort==='asc')
+    {
+      return durationA-durationB;
+    }
+    else{
+      return durationB-durationA
+    }
+})*/}
 
   return (
     
-    <div style={{ marginTop: '40px' }}>
+    <div style={{ marginTop: '25px' }}>
       
       <div style={{ display: 'flex' }}>
       <Kpi text="Total Employees Eligible for Rotation Pool" kpi1={kpi1}></Kpi>
@@ -126,23 +307,226 @@ const handleRowperpageChange=(event)=>{
       
         
       </div>
+      <div class="button">
+        <FormControl>
+        <select
+            value={durationsort}
+            onChange={handleDurationSortChange}
+            displayEmpty>
+              <option value="asc">DurationinProject(Ascending)</option>
+              <option value="desc">DurationinProject(Descending)</option>
+          </select>
+        </FormControl>
+        <FormControl component="fieldset">
+        
+          <RadioGroup row aria-label="rotationType" name="rotationType" value={rotationType} onChange={handleRotationTypechange}>
+            <FormControlLabel value="EligibleForRoation" control={<Radio/>} label="EligibleForRoatation"/>
+            <FormControlLabel value="flaggedforRotation"  control={<Radio/>} label="FlaggedForRotation"/>
+          </RadioGroup>
+          </FormControl>
       <Button variant="contained" onClick={handleOpenModal}>Add Employee</Button>
+     
+      </div>
     
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} style={{marginTop:'60px'}}>
+
+
+
+
+
         <Table>
           <TableHead >
             <TableRow >
-              <TableCell sx={{whiteSpace:'nowrap'}} align='center'>EmployeeID</TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>EmployeeID 
+              <ArrowDropDownIcon onClick={(e)=> handlePopoverOpen('employeeId',e)} style={{cursor:'pointer'}}/>
+              <Popover
+              open={popoverOpen['employeeId']}
+              anchorEl={PopoverAnchorE1['employeeId']}
+              onClose={()=>handlePopoverClose('employeeId')}
+              anchorOrigin={{
+                vertical:'bottom',
+                horizontal:'left'
+              }}
+              transformationOrigin={{
+                vertical:'bottom',
+                horizontal:'left'
+              }}
+              >
+                <div style={{padding:'20px'}}>
+                  <TextField
+                  label="Enter employee id"
+                  variant='outlined'
+                  size="small"
+                  value={popoverTexts['employeeId'] || ''}
+                  onChange={(e)=>setPopoverTexts(prevTexts=>({
+                    ...prevTexts,
+                    employeeId:e.target.value
+                  }))}
+                  />
+                  <Button variant="contained" onClick={(e)=>handlePopoverSubmit('employeeId',e)}>Submit</Button>
+                </div>
+              </Popover>
+              {
+                isapplied['employeeId'] && <div className='remove' onClick={()=>remove('employeeId')}>
+                  <div className='emppop'>{popoverTexts['employeeId']}</div>
+                  <div className='removebutton'>
+                    <HighlightOffIcon></HighlightOffIcon>
+                  </div>
+                </div>
+              }
+
+              
+              
+              
+              
+              </TableCell>
 
 
-              <TableCell sx={{whiteSpace:'nowrap'}} align='center'>EmployeeName</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap'}} align='center'>SDM</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap'}} align='center'>Skills</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap'}} align='center'>Duration in the<br/>Project</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap'}} align='center'>Project</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap'}} align='center'>Eligiblefor<br/>RotationPool</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap'}} align='center'>Flaggedfor<br/>Rotation</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap'}} align='center'>Remarks</TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>EmployeeName
+
+
+
+              <ArrowDropDownIcon onClick={(e)=> handlePopoverOpen('employeeName',e)} style={{cursor:'pointer'}}/>
+              <Popover
+              open={popoverOpen['employeeName']}
+              anchorEl={PopoverAnchorE1['employeeName']}
+              onClose={()=>handlePopoverClose('employeeName')}
+              anchorOrigin={{
+                vertical:'bottom',
+                horizontal:'left'
+              }}
+              transformationOrigin={{
+                vertical:'bottom',
+                horizontal:'left'
+              }}
+              >
+                <div style={{padding:'20px'}}>
+                  <TextField
+                  label="Enter employee name"
+                  variant='outlined'
+                  size="small"
+                  value={popoverTexts['employeeName'] || ''}
+                  onChange={(e)=>setPopoverTexts(prevTexts=>({
+                    ...prevTexts,
+                    employeeName:e.target.value
+                    
+                  }))}
+                  />
+                  <Button variant="contained" onClick={(e)=>handlePopoverSubmit('employeeName',e)}>Submit</Button>
+                </div>
+              </Popover>
+              {
+                isapplied['employeeName'] && <div className='remove' onClick={()=>remove('employeeName')}>
+                  <div className='emppop'>{popoverTexts['employeeName']}</div>
+                  <div className='removebutton'>
+                    <HighlightOffIcon></HighlightOffIcon>
+                  </div>
+                </div>
+              }
+              
+              
+              
+              
+              </TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>SDM
+              <ArrowDropDownIcon onClick={(e)=> handlePopoverOpen1('sdm',e)} style={{cursor:'pointer'}}/>
+              <Popover
+              open={popoverOpen['sdm']}
+              anchorEl={PopoverAnchorE1['sdm']}
+              onClose={()=>handlePopoverClose('sdm')}
+              anchorOrigin={{
+                vertical:'bottom',
+                horizontal:'right'
+              }}
+              transformationOrigin={{
+                vertical:'top',
+                horizontal:'left'
+              }}
+              >
+                <div style={{padding:'10px'}}>
+                  
+                  <select
+                  value={popoverTexts.sdm}
+                  onChange={(e)=>handlePopoverSubmit1('sdm',e)}
+                  style={{minWidth:'5px', minHeight:'2px'}}
+                >
+                  <option value="" selected disabled hidden>choose</option>
+                  <option value="Amarendra">Amarendra</option>
+                  <option value="Dinesh">Dinesh</option>
+                </select>
+                
+                                  </div>
+              </Popover>
+              {
+                isapplied['sdm'] && <div className='remove' onClick={()=>remove('sdm')}>
+                  <div className='emppop'>{popoverTexts['sdm']}</div>
+                  <div className='removebutton'>
+                    <HighlightOffIcon></HighlightOffIcon>
+                  </div>
+                </div>
+              }
+              
+              
+              
+              
+              
+              
+              
+              </TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Skills
+              <ArrowDropDownIcon onClick={(e)=> handlePopoverOpen('skills',e)} style={{cursor:'pointer'}}/>
+              <Popover
+              open={popoverOpen['skills']}
+              anchorEl={PopoverAnchorE1['skills']}
+              onClose={()=>handlePopoverClose('skills')}
+              anchorOrigin={{
+                vertical:'bottom',
+                horizontal:'left'
+              }}
+              transformationOrigin={{
+                vertical:'bottom',
+                horizontal:'left'
+              }}
+              >
+                <div style={{padding:'20px'}}>
+                  <TextField
+                  label="Enter skills"
+                  variant='outlined'
+                  size="small"
+                  value={popoverTexts['skills'] || ''}
+                  onChange={(e)=>setPopoverTexts(prevTexts=>({
+                    ...prevTexts,
+                    skills:e.target.value
+                  }))}
+                  />
+                  <Button variant="contained" onClick={(e)=>handlePopoverSubmit('skills',e)}>Submit</Button>
+                </div>
+              </Popover>
+              {
+                isapplied['skills'] && <div className='remove' onClick={()=>remove('skills')}>
+                  <div className='emppop'>{popoverTexts['skills']}</div>
+                  <div className='removebutton'>
+                    <HighlightOffIcon></HighlightOffIcon>
+                  </div>
+                </div>
+              }
+
+
+
+
+
+
+
+
+              </TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Duration in theProject
+
+              
+              </TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Project</TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>EligibleforRotationPool</TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>FlaggedforRotation</TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Remarks</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
