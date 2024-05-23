@@ -18,7 +18,7 @@ const TableComponent = ({ onOptionChange }) => {
   const [kpi2, setKpi2] = useState(0);
   const [tableData, setTableData] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const[rotationType,setRotationType]=useState('')
+  const[rotationType,setRotationType]=useState('All')
   const [durationsort,setDurationSort]=useState('')
   const[popoverTexts,setPopoverTexts]=useState({})
   const[popoverOpen,setPopoverOpen]=useState({
@@ -54,8 +54,8 @@ const TableComponent = ({ onOptionChange }) => {
     skills:false,
     durationInProject:false,
     project:false,
-    eligibleForRotationPool:false,
-    flaggedForRotation:false,
+    filterbased:false
+    
     
 
 
@@ -79,6 +79,13 @@ const TableComponent = ({ onOptionChange }) => {
 
 
   }, []);
+  useEffect(()=>{
+    if(Object.keys(popoverTexts).length>0){
+      makeAPIcall();
+    }
+
+  },[isapplied])
+
 
   const fetchData =  () => {
     try {
@@ -106,6 +113,17 @@ const TableComponent = ({ onOptionChange }) => {
     {
       console.log("error in fetching KPIs",error)
 
+    }
+  }
+  const makeAPIcall = async()=>{
+    try{
+      const response=await axios.post('http://localhost:8080/api/employee/filters',popoverTexts)
+      setTableData(response.data)
+      console.log(response.data)
+    }
+    catch(error)
+    {
+      console.log('Error in making API call',error)
     }
   }
 
@@ -172,13 +190,22 @@ const handleRowperpageChange=(event)=>{
 }
 const handleRotationTypechange=(event)=>{
   
-  
+  setPopoverTexts(prevTexts=>({
+    ...prevTexts,
+    filterbased:event.target.value
+  }))
+  setIsapplied(prevIsapplied=>({
+    ...prevIsapplied,
+    [event.target.value]:true
+  }))
   setRotationType(event.target.value)
+
   
 
 
 
 }
+console.log(popoverTexts)
 const handleDurationSortChange=(event)=>{
   setDurationSort(event.target.value)
 }
@@ -213,13 +240,18 @@ const handlePopoverSubmit=(columnName)=>{
     [columnName]:prevTexts[columnName]
 
   }));
+
+
+  
+  
   handlePopoverClose(columnName)
   //setPopoverFilter(popoverText)
+ 
   setIsapplied(prevIsapplied=>({
     ...prevIsapplied,
     [columnName]:true
   }));
-  console.log(popoverTexts)
+  
   
 };
 const remove=(columnName)=>{
@@ -260,7 +292,7 @@ const handlePopoverSubmit1=(columnName,e)=>{
     ...prevTexts,
     sdm:e.target.value
   }))
-  console.log(popoverTexts)
+  
  
   handlePopoverClose(columnName)
   //setPopoverFilter(popoverText)
@@ -320,11 +352,13 @@ const sortedData=filteredData.sort((a,b)=>{
         <FormControl component="fieldset">
         
           <RadioGroup row aria-label="rotationType" name="rotationType" value={rotationType} onChange={handleRotationTypechange}>
-            <FormControlLabel value="EligibleForRoation" control={<Radio/>} label="EligibleForRoatation"/>
-            <FormControlLabel value="flaggedforRotation"  control={<Radio/>} label="FlaggedForRotation"/>
+          <FormControlLabel value="All" control={<Radio/>} label="All"/>
+            <FormControlLabel value="EligibleForRotation" control={<Radio/>} label="EligibleForRotation"/>
+            <FormControlLabel value="FlaggedForRotation"  control={<Radio/>} label="FlaggedForRotation"/>
           </RadioGroup>
           </FormControl>
       <Button variant="contained" onClick={handleOpenModal}>Add Employee</Button>
+      
      
       </div>
     
@@ -337,7 +371,7 @@ const sortedData=filteredData.sort((a,b)=>{
         <Table>
           <TableHead >
             <TableRow >
-              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>EmployeeID 
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Employee ID 
               <ArrowDropDownIcon onClick={(e)=> handlePopoverOpen('employeeId',e)} style={{cursor:'pointer'}}/>
               <Popover
               open={popoverOpen['employeeId']}
@@ -357,11 +391,13 @@ const sortedData=filteredData.sort((a,b)=>{
                   label="Enter employee id"
                   variant='outlined'
                   size="small"
-                  value={popoverTexts['employeeId'] || ''}
+                  defaultValue={popoverTexts['employeeId'] || ''}
                   onChange={(e)=>setPopoverTexts(prevTexts=>({
                     ...prevTexts,
                     employeeId:e.target.value
                   }))}
+                
+                  
                   />
                   <Button variant="contained" onClick={(e)=>handlePopoverSubmit('employeeId',e)}>Submit</Button>
                 </div>
@@ -382,7 +418,7 @@ const sortedData=filteredData.sort((a,b)=>{
               </TableCell>
 
 
-              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>EmployeeName
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Employee Name
 
 
 
@@ -451,8 +487,17 @@ const sortedData=filteredData.sort((a,b)=>{
                   style={{minWidth:'5px', minHeight:'2px'}}
                 >
                   <option value="" selected disabled hidden>choose</option>
-                  <option value="Amarendra">Amarendra</option>
-                  <option value="Dinesh">Dinesh</option>
+                  <option value="Amarendra kumar">Amarendra kumar</option>
+                  <option value="Avanti Kapse">Avanti Kapse</option>
+                  <option value="Dinesh Shalgar">Dinesh Shalgar</option>
+                  <option value="Gaurav Agarwal">Gaurav Agarwal</option>
+                  <option value="Rahul Narkar">Rahul Narkar</option>
+                  <option value="Simran Chourasiya">Simran Chourasiya</option>
+                  <option value="Sujeet Joshi">Sujeet Joshi</option>
+                  <option value="Sahu Summit">Sahu Summit</option>
+                  <option value="Swati padhye">Swati padhye</option>
+
+  
                 </select>
                 
                                   </div>
@@ -519,19 +564,81 @@ const sortedData=filteredData.sort((a,b)=>{
 
 
               </TableCell>
-              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Duration in theProject
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Duration in the Project
 
               
               </TableCell>
-              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Project</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>EligibleforRotationPool</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>FlaggedforRotation</TableCell>
-              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Remarks</TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Project
+              <ArrowDropDownIcon onClick={(e)=> handlePopoverOpen('project',e)} style={{cursor:'pointer'}}/>
+              <Popover
+              open={popoverOpen['project']}
+              anchorEl={PopoverAnchorE1['project']}
+              onClose={()=>handlePopoverClose('project')}
+              anchorOrigin={{
+                vertical:'bottom',
+                horizontal:'left'
+              }}
+              transformationOrigin={{
+                vertical:'bottom',
+                horizontal:'left'
+              }}
+              >
+                <div style={{padding:'20px'}}>
+                  <TextField
+                  label="Enter skills"
+                  variant='outlined'
+                  size="small"
+                  value={popoverTexts['project'] || ''}
+                  onChange={(e)=>setPopoverTexts(prevTexts=>({
+                    ...prevTexts,
+                    project:e.target.value
+                  }))}
+                  />
+                  <Button variant="contained" onClick={(e)=>handlePopoverSubmit('project',e)}>Submit</Button>
+                </div>
+              </Popover>
+              {
+                isapplied['project'] && <div className='remove' onClick={()=>remove('project')}>
+                  <div className='emppop'>{popoverTexts['project']}</div>
+                  <div className='removebutton'>
+                    <HighlightOffIcon></HighlightOffIcon>
+                  </div>
+                </div>
+              }
+
+
+
+
+
+
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              </TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Eligible for RotationPool</TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Flagged for Rotation</TableCell>
+              <TableCell sx={{whiteSpace:'nowrap',color:'white'}} align='center'>Remark</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {tableData.slice(page*rowperpage,page*rowperpage+rowperpage).map(item => (
-              <TableRow key={item.employeeId} className="emp">
+              <TableRow key={item.employeeId} className="emp" sx={{paddingBottom:20}}>
                 <TableCell sx={{fontWeight:'bold',whiteSpace:'nowrap'}}align='center'>
                   <div style={{display:'flex',alignItems:'center'}}>
                   <span>{item.employeeId}</span>
@@ -544,7 +651,7 @@ const sortedData=filteredData.sort((a,b)=>{
                 <TableCell sx={{whiteSpace:'nowrap'}} align='center'>{item.skills}</TableCell>
                 <TableCell sx={{whiteSpace:'nowrap'}} align='center'>
                 <div style={{alignItems:'center'}}>
-                  <span>{item.durationInProject}</span>
+                  <span>{item.durationInProject}{"yr"}</span>
                 </div>
                   </TableCell>
                 <TableCell sx={{whiteSpace:'nowrap'}} align='center'>{item.project}</TableCell>
