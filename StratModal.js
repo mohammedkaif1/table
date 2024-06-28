@@ -21,7 +21,7 @@ import ContingencyTable from '../../Widgets/HiringWidgets/tables/StratModal/Cont
 import RotationPoolTable from '../../Widgets/HiringWidgets/tables/StratModal/RotationPoolTable';
 import HireTable from '../../Widgets/HiringWidgets/tables/StratModal/HireTable';
 
-import { getContingent, getRotation, updateContingencyProject } from "../../Services/HiringStratgey";
+import { getContingent, getRotation, updateContingencyProject,checkoutforcontingent } from "../../Services/HiringStratgey";
 
 
 function TabPanel(props) {
@@ -93,7 +93,7 @@ const AntTab = styled((props) => <Tab disableRipple {...props} />)(({ theme }) =
   },
 }));
 
-function HiringTabs({data, setCheckedContingencyRows, checkedRotationRows, setCheckedRotationRows}) {
+function HiringTabs({data,updatec,updater}) {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
   const [contingentData, setContingentData] = useState([]);
@@ -106,6 +106,9 @@ function HiringTabs({data, setCheckedContingencyRows, checkedRotationRows, setCh
   const handleChangeIndex = (index) => {
     setValue(index);
   };
+  
+    
+  
 
   
 
@@ -148,10 +151,10 @@ function HiringTabs({data, setCheckedContingencyRows, checkedRotationRows, setCh
         onChangeIndex={handleChangeIndex}
       >
         <TabPanel value={value} index={0} dir={theme.direction}>
-         <ContingencyTable data={contingentData} setCheckedContingencyRows={setCheckedContingencyRows}/>
+         <ContingencyTable data={contingentData} updatecon={updatec}/>
         </TabPanel>
         <TabPanel value={value} index={1} dir={theme.direction}>
-          <RotationPoolTable data={rotationData} setCheckedRows={setCheckedRotationRows}/>
+          <RotationPoolTable data={rotationData} updaterot={updater}/>
         </TabPanel>
         <TabPanel value={value} index={2} dir={theme.direction}>
           <HireTable data={data} />
@@ -179,13 +182,26 @@ const style = {
   overflowY: 'scroll', 
 };
 
+
 const StratModal = ({open, handleClose, data}) => {
 
   const [showTable, setShowTable] = useState(false);
   const [checkedContingencyRows, setCheckedContingencyRows] = useState([]);
   const [checkedRotationRows, setCheckedRotationRows] = useState([]);
+  const[checkoutcontingentemployeetable,setCheckoutcontingentemployeetable]=useState([])
+  
 
+  function updatec(con1)
+  {
+    
+    setCheckedContingencyRows(con1)
+  }
 
+  function updater(ro1)
+  {
+    
+    setCheckedRotationRows(ro1)
+  }
   const handleShowTable = () => {
     setShowTable(true);
   }
@@ -195,13 +211,17 @@ const StratModal = ({open, handleClose, data}) => {
     setShowTable(false);
   }
 
-  const handleFreeze = ({ data, checkedContingencyRows }) => {
+  const handleFreeze = ({data}) => {
     try {
-        console.log(checkedContingencyRows)
+      const selectall=[...checkedContingencyRows,...checkedRotationRows]
+      console.log(selectall)
+        {/*console.log(checkedContingencyRows)
         if(checkedContingencyRows.length() > 0) {
             updateContingencyProject(data.projectID, checkedContingencyRows);
         }
-        alert(`Hiring Strategy for project ${data.projectName} is done`)
+        alert(`Hiring Strategy for project ${data.projectName} is done`)*/}
+        checkoutforcontingent(checkedContingencyRows).then((res)=>setCheckoutcontingentemployeetable(res.data))
+        console.log(checkoutcontingentemployeetable)
         
     } catch(error) {
         console.log(error);
@@ -260,10 +280,11 @@ const StratModal = ({open, handleClose, data}) => {
             {showTable && (
               <div>
                 <HiringTabs data={data}
-                  setCheckedContingencyRows={setCheckedContingencyRows}
-                  setCheckedRotationRows={setCheckedRotationRows}
+                updatec={updatec}
+                updater={updater}
+                  
                 />
-                <Button style={{left:850, border: '2px solid #801947', borderRadius: 12, height: 45, marginTop: 20, width: 120, color: "#801947"}} onClick={() => handleFreeze(data, checkedContingencyRows)}>Checkout</Button>
+                <Button style={{left:850, border: '2px solid #801947', borderRadius: 12, height: 45, marginTop: 20, width: 120, color: "#801947"}} onClick={() => handleFreeze(data)}>Checkout</Button>
               </div> 
             )}
         </Box>
