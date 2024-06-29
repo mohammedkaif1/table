@@ -13,11 +13,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:hover': {
     backgroundColor: theme.palette.action.selected,
   },
-  height: '60px', // Adjust row height
+  height: '60px',
 }));
 
 const StyledButton = styled(Button)({
-  backgroundColor: '#6f4c8e', // Custom button color
+  backgroundColor: '#6f4c8e',
   color: '#ffffff',
   '&:hover': {
     backgroundColor: '#5a3b70',
@@ -34,18 +34,26 @@ const employees = [
 
 const EmployeePopup = () => {
   const [open, setOpen] = useState(true);
-  const [selected, setSelected] = useState({});
+  const [selected, setSelected] = useState(
+    employees.reduce((acc, emp) => ({ ...acc, [emp.id]: true }), {})
+  );
 
   const handleCheckboxChange = (id) => {
     setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleClose = () => {
+  const handleSave = () => {
+    const selectedEmployees = employees.filter(emp => selected[emp.id]);
+    const result = selectedEmployees.map(emp => ({
+      empId: emp.id,
+      status: emp.status,
+    }));
+    console.log(result);
     setOpen(false);
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
       <DialogTitle>Checkout for Hiring Employees</DialogTitle>
       <DialogContent>
         <TableContainer component={Paper}>
@@ -78,7 +86,7 @@ const EmployeePopup = () => {
                   <TableCell>{emp.category}</TableCell>
                   <TableCell>
                     <Checkbox
-                      checked={!!selected[emp.id]}
+                      checked={selected[emp.id]}
                       onChange={() => handleCheckboxChange(emp.id)}
                     />
                   </TableCell>
@@ -92,10 +100,10 @@ const EmployeePopup = () => {
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color="primary">
+        <Button onClick={() => setOpen(false)} color="primary">
           Cancel
         </Button>
-        <StyledButton onClick={handleClose}>
+        <StyledButton onClick={handleSave}>
           Save
         </StyledButton>
       </DialogActions>
