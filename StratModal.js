@@ -8,6 +8,7 @@ import Divider from '@mui/material/Divider';
 import { TextField } from '@mui/material';
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import Modal1 from '../../Widgets/ContingentWidgets/Modal';
 
 import { styled } from '@mui/material/styles'   
 import PropTypes from 'prop-types';
@@ -20,8 +21,10 @@ import Tab from '@mui/material/Tab';
 import ContingencyTable from '../../Widgets/HiringWidgets/tables/StratModal/ContingencyTable';
 import RotationPoolTable from '../../Widgets/HiringWidgets/tables/StratModal/RotationPoolTable';
 import HireTable from '../../Widgets/HiringWidgets/tables/StratModal/HireTable';
+import Checkout from '../../Widgets/HiringWidgets/tables/StratModal/checkout';
 
-import { getContingent, getRotation, updateContingencyProject,checkoutforcontingent } from "../../Services/HiringStratgey";
+import { getContingent, getRotation, updateContingencyProject,checkoutforcontingent,checkoutforrotation } from "../../Services/HiringStratgey";
+import zIndex from '@mui/material/styles/zIndex';
 
 
 function TabPanel(props) {
@@ -93,7 +96,7 @@ const AntTab = styled((props) => <Tab disableRipple {...props} />)(({ theme }) =
   },
 }));
 
-function HiringTabs({data,updatec,updater}) {
+function HiringTabs({data,updatec,updater,selectedCheckboxes,handleCheckboxChange}) {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
   const [contingentData, setContingentData] = useState([]);
@@ -119,7 +122,7 @@ function HiringTabs({data,updatec,updater}) {
         setContingentData(contData);
         const rotData = await getRotation();
         setRotationData(rotData);
-        console.log(rotationData)
+        //console.log(rotationData)
 
       } catch(error) {
         console.error("Error fetching projects: ", error);
@@ -151,10 +154,10 @@ function HiringTabs({data,updatec,updater}) {
         onChangeIndex={handleChangeIndex}
       >
         <TabPanel value={value} index={0} dir={theme.direction}>
-         <ContingencyTable data={contingentData} updatecon={updatec}/>
+         <ContingencyTable data={contingentData} updatecon={updatec} selectedCheckboxes={selectedCheckboxes['contingent'] || {}} handleCheckboxChange={(id)=>handleCheckboxChange('contingent',id)}/>
         </TabPanel>
         <TabPanel value={value} index={1} dir={theme.direction}>
-          <RotationPoolTable data={rotationData} updaterot={updater}/>
+          <RotationPoolTable data={rotationData} updaterot={updater} selectedCheckboxes={selectedCheckboxes['rotation'] || {}} handleCheckboxChange={(id)=>handleCheckboxChange('rotation',id)}/>
         </TabPanel>
         <TabPanel value={value} index={2} dir={theme.direction}>
           <HireTable data={data} />
@@ -186,21 +189,79 @@ const style = {
 const StratModal = ({open, handleClose, data}) => {
 
   const [showTable, setShowTable] = useState(false);
-  const [checkedContingencyRows, setCheckedContingencyRows] = useState([]);
-  const [checkedRotationRows, setCheckedRotationRows] = useState([]);
+  const [checkoutdata,setCheckoutdata]=useState([])
+  const[opencheck,setopencheck]=useState(false)
+  
+  //const [checkedContingencyRows, setCheckedContingencyRows] = useState([]);
+  //const [checkedRotationRows, setCheckedRotationRows] = useState([]);
   const[checkoutcontingentemployeetable,setCheckoutcontingentemployeetable]=useState([])
+  const [checkoutrotationtable,setCheckoutrotationtable]=useState([])
+  const [selectedCheckboxes,setSelectedCheckboxes]=useState({})
+  const handleCheckboxChange=(screen,id)=>{
+    setSelectedCheckboxes((prevState)=>({
+      ...prevState,[screen]:{
+        ...prevState[screen],
+        [id]:!prevState[screen]?.[id]
+      }
+    }))
+  }
+  
+  const handlecheckclose=()=>{
+    setopencheck(false)
+  }
+  
+  
+  //console.log(localContRows)
+  function tocheckoutpopup()
+  {
+    
+    console.log(checkoutdata)
+    
+    setopencheck(true)
+    
+
+
+    
+  }
+  
+
+
+
+  {/*const [selected, setSelected] = useState(
+    data.reduce((acc, emp) => ({ ...acc, [emp.id]: true }), {})
+  );
+
+  const handleCheckboxChange1 = (id) => {
+    setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleSave = () => {
+    const selectedEmployees = data.filter(emp => selected[emp.id]);
+    const result = selectedEmployees.map(emp => ({
+      empId: emp.id,
+      status: emp.status,
+    }));
+    console.log(result);
+    setOpen(false);
+  };
+function close1()
+{
+  setopencheck(false)
+}*/}
+  
+
   
 
   function updatec(con1)
   {
     
-    setCheckedContingencyRows(con1)
+    
   }
 
   function updater(ro1)
   {
     
-    setCheckedRotationRows(ro1)
+    
   }
   const handleShowTable = () => {
     setShowTable(true);
@@ -210,18 +271,73 @@ const StratModal = ({open, handleClose, data}) => {
     handleClose();
     setShowTable(false);
   }
+  
+  
 
   const handleFreeze = ({data}) => {
     try {
-      const selectall=[...checkedContingencyRows,...checkedRotationRows]
-      console.log(selectall)
+      //const selectall=[...checkedContingencyRows,...checkedRotationRows]
+      //console.log(selectall)
+      //console.log(selectedCheckboxes.contingent.length)
+      if('contingent' in selectedCheckboxes )
+        {
+          var contempids=Object.keys(selectedCheckboxes.contingent).filter(id=>selectedCheckboxes.contingent[id]).map(id=>parseInt(id,10))
+        }
+        if('rotation' in selectedCheckboxes)
+          {
+            var roatempids=Object.keys(selectedCheckboxes.rotation).filter(id=>selectedCheckboxes.rotation[id]).map(id=>parseInt(id,10))
+          }
+        
+        if(contempids!=undefined)
+          {
+            checkoutforcontingent(contempids).then((res)=>setCheckoutcontingentemployeetable(res.data))
+
+          }
+          if(roatempids!=undefined)
+            {
+              checkoutforrotation(roatempids).then((res)=>setCheckoutrotationtable(res.data))
+              
+            }
+            var selectedall
+      
+      
+      //const selectall=[...contempids,...roatempids]
+      //console.log(selectall)
+
         {/*console.log(checkedContingencyRows)
         if(checkedContingencyRows.length() > 0) {
             updateContingencyProject(data.projectID, checkedContingencyRows);
         }
         alert(`Hiring Strategy for project ${data.projectName} is done`)*/}
-        checkoutforcontingent(checkedContingencyRows).then((res)=>setCheckoutcontingentemployeetable(res.data))
-        console.log(checkoutcontingentemployeetable)
+
+       
+
+        //const empidofcont=checkoutforcontingent(contempids)
+        //const empidsofrot=checkoutforrotation(roatempids)
+        //console.log(empidofcont)
+        //console.log(empidsofrot)
+        {/*checkoutforcontingent(contempids).then((res)=>setCheckoutcontingentemployeetable(res.data))
+       
+        checkoutforrotation(roatempids).then((res)=>setCheckoutrotationtable(res.data))*/}
+        //setCheckoutdata(...checkoutcontingentemployeetable,...checkoutrotationtable)
+        setopencheck(true)
+        tocheckoutpopup()
+        //opencheckout();
+        //toupdate()
+        //const selected=[...checkoutcontingentemployeetable,...checkoutrotationtable]
+        
+        
+        
+        
+      
+        
+
+        // now i need to call a popup which shows the the checkout employees
+
+        
+        
+        
+        
         
     } catch(error) {
         console.log(error);
@@ -230,6 +346,9 @@ const StratModal = ({open, handleClose, data}) => {
     handleClose();
     setShowTable(false);
   }
+  
+  
+  
 
  
 
@@ -282,6 +401,9 @@ const StratModal = ({open, handleClose, data}) => {
                 <HiringTabs data={data}
                 updatec={updatec}
                 updater={updater}
+                selectedCheckboxes={selectedCheckboxes}
+                handleCheckboxChange={handleCheckboxChange}
+
                   
                 />
                 <Button style={{left:850, border: '2px solid #801947', borderRadius: 12, height: 45, marginTop: 20, width: 120, color: "#801947"}} onClick={() => handleFreeze(data)}>Checkout</Button>
@@ -289,7 +411,28 @@ const StratModal = ({open, handleClose, data}) => {
             )}
         </Box>
       </Modal>
+      {/*<Checkout open={opencheck}></Checkout>*/}
+
+      {/*<div
+            style={{
+                textAlign: "center",
+                display: "block",
+                padding: 30,
+                margin: "auto",
+                
+            }}
+        >
+           
+            <Modal1 isOpen={opencheck} sx={{zIndex:4}} >
+    
+                <>
+                <div> hello</div>
+                </>
+            </Modal1>
+        </div>*/}
+
     </div>
+    
   );
 }
 
