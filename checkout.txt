@@ -28,17 +28,24 @@ const StyledButton = styled(Button)({
 
 const Checkout = ({data,open,close}) => {
   //const [open, setOpen] = useState(true);
-  const [selected, setSelected] = useState(
-    data.reduce((acc, emp) => ({ ...acc, [emp.id]: true }), {})
+  const [selected, setSelected] = useState(()=>{
+    const initialSelected={}
+    data.forEach(element => {
+      initialSelected[element.employeeId]=true;
+      
+    });
+    return initialSelected
+  }
+    
   );
-  const handleCheckboxChange1 = (id) => {
-    setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+  const handleCheckboxChange1 = (employeeId) => {
+    setSelected((prev) => ({ ...prev, [employeeId]: !prev[employeeId] }));
   };
   const handleSave = () => {
-    const selectedEmployees = data.filter(emp => selected[emp.id]);
+    const selectedEmployees = data.filter(emp => selected[emp.employeeId]);
     const result = selectedEmployees.map(emp => ({
-      empId: emp.id,
-      status: emp.status,
+      empId: emp.employeeId,
+      status: emp.category,
     }));
     console.log(result);
     close();
@@ -79,8 +86,8 @@ const Checkout = ({data,open,close}) => {
                   <TableCell>{emp.category}</TableCell>
                   <TableCell>
                     <Checkbox
-                      checked={selected[emp.id]}
-                      onChange={() => handleCheckboxChange1(emp.id)}
+                      checked={selected[emp.employeeId]}
+                      onChange={() => handleCheckboxChange1(emp.employeeId)}
                     />
                   </TableCell>
                 </StyledTableRow>
