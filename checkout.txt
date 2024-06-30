@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle,
@@ -24,23 +24,25 @@ const StyledButton = styled(Button)({
   },
 });
 
+const Checkout = ({ data, open, close }) => {
+  const [selected, setSelected] = useState({});
 
-
-const Checkout = ({data,open,close}) => {
-  //const [open, setOpen] = useState(true);
-  const [selected, setSelected] = useState(()=>{
-    const initialSelected={}
-    data.forEach(element => {
-      initialSelected[element.employeeId]=true;
-      
+  // Initialize selected state when data changes
+  useEffect(() => {
+    const initialSelected = {};
+    data.forEach(emp => {
+      initialSelected[emp.employeeId] = true; // Default all checkboxes to checked
     });
-    return initialSelected
-  }
-    
-  );
-  const handleCheckboxChange1 = (employeeId) => {
-    setSelected((prev) => ({ ...prev, [employeeId]: !prev[employeeId] }));
+    setSelected(initialSelected);
+  }, [data]);
+
+  const handleCheckboxChange = (employeeId) => {
+    setSelected(prevSelected => ({
+      ...prevSelected,
+      [employeeId]: !prevSelected[employeeId] // Toggle checkbox state
+    }));
   };
+
   const handleSave = () => {
     const selectedEmployees = data.filter(emp => selected[emp.employeeId]);
     const result = selectedEmployees.map(emp => ({
@@ -50,10 +52,9 @@ const Checkout = ({data,open,close}) => {
     console.log(result);
     close();
   };
-  
 
   return (
-    <Dialog open={open}  maxWidth="md" fullWidth>
+    <Dialog open={open} maxWidth="md" fullWidth>
       <DialogTitle>Checkout for Hiring Employees</DialogTitle>
       <DialogContent>
         <TableContainer component={Paper}>
@@ -80,14 +81,14 @@ const Checkout = ({data,open,close}) => {
                   <TableCell>{emp.sdm}</TableCell>
                   <TableCell>{emp.duration}</TableCell>
                   <TableCell>{emp.skills}</TableCell>
-                  <TableCell>{emp.experince}</TableCell>
+                  <TableCell>{emp.experience}</TableCell>
                   <TableCell>{emp.location}</TableCell>
                   <TableCell>{emp.contingencyStatus}</TableCell>
                   <TableCell>{emp.category}</TableCell>
                   <TableCell>
                     <Checkbox
                       checked={selected[emp.employeeId]}
-                      onChange={() => handleCheckboxChange1(emp.employeeId)}
+                      onChange={() => handleCheckboxChange(emp.employeeId)}
                     />
                   </TableCell>
                 </StyledTableRow>
