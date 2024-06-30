@@ -8,10 +8,10 @@ import { styled } from '@mui/system';
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
+    //backgroundColor: theme.palette.action.hover,
   },
   '&:hover': {
-    backgroundColor: theme.palette.action.selected,
+    //backgroundColor: theme.palette.action.selected,
   },
   height: '60px',
 }));
@@ -24,36 +24,29 @@ const StyledButton = styled(Button)({
   },
 });
 
-const employees = [
-  { id: 103261, name: 'Sunil Kumar', sdm: 'Amarendra', duration: '12 Months', skills: 'Java Developer', experience: '20 months', location: 'Pune', status: 'ready for Deployable', category: 'Rotation Pool' },
-  { id: 103950, name: 'Raj Girase', sdm: 'Gaurav', duration: '12 Months', skills: 'Spring Boot', experience: '15 months', location: 'Bangalore', status: 'Planned for a Project', category: 'Rotation Pool' },
-  { id: 103265, name: 'Shubham Sourabh', sdm: 'Swati', duration: '12 Months', skills: 'Cloud Developer', experience: '10 months', location: 'Pune', status: 'Assigned as a contingent', category: 'Rotation Pool' },
-  { id: 102717, name: 'Tejesh Gaikwad', sdm: 'Swati', duration: '12 Months', skills: 'React', experience: '10 months', location: 'Pune', status: 'Release From PD', category: 'Contingency List' },
-  { id: 102485, name: 'Kunal Damare', sdm: 'Dinesh', duration: '12 Months', skills: 'Java Backend', experience: '24 months', location: 'Pune', status: 'Assigned as Billable', category: 'Contingency List' },
-];
 
-const EmployeePopup = () => {
-  const [open, setOpen] = useState(true);
+
+const Checkout = ({data,open,close}) => {
+  //const [open, setOpen] = useState(true);
   const [selected, setSelected] = useState(
-    employees.reduce((acc, emp) => ({ ...acc, [emp.id]: true }), {})
+    data.reduce((acc, emp) => ({ ...acc, [emp.id]: true }), {})
   );
-
-  const handleCheckboxChange = (id) => {
+  const handleCheckboxChange1 = (id) => {
     setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
   };
-
   const handleSave = () => {
-    const selectedEmployees = employees.filter(emp => selected[emp.id]);
+    const selectedEmployees = data.filter(emp => selected[emp.id]);
     const result = selectedEmployees.map(emp => ({
       empId: emp.id,
       status: emp.status,
     }));
     console.log(result);
-    setOpen(false);
+    close();
   };
+  
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+    <Dialog open={open}  maxWidth="md" fullWidth>
       <DialogTitle>Checkout for Hiring Employees</DialogTitle>
       <DialogContent>
         <TableContainer component={Paper}>
@@ -67,27 +60,27 @@ const EmployeePopup = () => {
                 <TableCell>Skills</TableCell>
                 <TableCell>Experience</TableCell>
                 <TableCell>Location</TableCell>
-                <TableCell>Contingency Status</TableCell>
+                <TableCell>Status</TableCell>
                 <TableCell>Category</TableCell>
                 <TableCell>Remove</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {employees.map((emp) => (
-                <StyledTableRow key={emp.id}>
-                  <TableCell>{emp.id}</TableCell>
-                  <TableCell>{emp.name}</TableCell>
+              {data.map((emp) => (
+                <StyledTableRow key={emp.employeeId}>
+                  <TableCell>{emp.employeeId}</TableCell>
+                  <TableCell>{emp.employeeName}</TableCell>
                   <TableCell>{emp.sdm}</TableCell>
                   <TableCell>{emp.duration}</TableCell>
                   <TableCell>{emp.skills}</TableCell>
-                  <TableCell>{emp.experience}</TableCell>
+                  <TableCell>{emp.experince}</TableCell>
                   <TableCell>{emp.location}</TableCell>
-                  <TableCell>{emp.status}</TableCell>
+                  <TableCell>{emp.contingencyStatus}</TableCell>
                   <TableCell>{emp.category}</TableCell>
                   <TableCell>
                     <Checkbox
                       checked={selected[emp.id]}
-                      onChange={() => handleCheckboxChange(emp.id)}
+                      onChange={() => handleCheckboxChange1(emp.id)}
                     />
                   </TableCell>
                 </StyledTableRow>
@@ -100,7 +93,7 @@ const EmployeePopup = () => {
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setOpen(false)} color="primary">
+        <Button onClick={close} color="primary">
           Cancel
         </Button>
         <StyledButton onClick={handleSave}>
@@ -111,4 +104,4 @@ const EmployeePopup = () => {
   );
 };
 
-export default EmployeePopup;
+export default Checkout;
