@@ -298,7 +298,7 @@ function close1()
               checkoutforrotation(roatempids).then((res)=>setCheckoutrotationtable(res.data))
               
             }
-            var selectedall
+            
       
       
       //const selectall=[...contempids,...roatempids]
